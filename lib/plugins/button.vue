@@ -1,11 +1,20 @@
 <template>
-  <div>button-test</div>
+  <div @click="onClick">button-test</div>
 </template>
 
 <script>
 export default {
-    name: 'JoyinButton'
-    
+    name: 'JoyinButton',
+    data() {
+        return {
+            test: '测试'
+        }
+    },
+    method: {
+        onClick() {
+            console.log('button--click--');
+        }
+    }
 }
 </script>
 
