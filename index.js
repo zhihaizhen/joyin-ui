@@ -4,15 +4,8 @@
  */
 
 import IelPagination from './lib/iel/pagination';
-import IelTableLayout from './lib/iel/tableLayout';
+import JoyinButton from './lib/plugins/button';
 
 export {
-  Login,
-  FrameIndex, FrameHome,
-  Approval,
-  Preview,
-  IelPagination,
-  IelTableLayout,
-  i18n,
-  directives,
+  JoyinButton
 };
