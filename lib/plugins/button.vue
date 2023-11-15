@@ -10,7 +10,7 @@ export default {
             test: '测试'
         }
     },
-    method: {
+    methods: {
         onClick() {
             console.log('button--click--');
             this.$emit('click')

@@ -4,7 +4,8 @@
  */
 
 import JoyinButton from './lib/plugins/button';
-
+import JoyinRangePicker from './lib/plugins/rangePicker';
 export {
-  JoyinButton
+  JoyinButton,
+  JoyinRangePicker
 };
