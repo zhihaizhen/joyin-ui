@@ -11,15 +11,15 @@ export default {
     // 清除开始日期
     clearStart: {
       type: Boolean,
-      default: true
+      default: false
     },
     // 清除结束日期
     clearEnd: {
       type: Boolean,
-      default: true
+      default: false
     },
     // 清除所有
-    clearAll: {
+    allowClear: {
       type: Boolean,
       default: true
     },
@@ -65,7 +65,7 @@ export default {
   methods: {
     onClearByIndex(i) {
       let changeDate = [];
-      if (!this.clearAll) {
+      if (!this.allowClear) {
         const [s, e] = this.rangeDate;
         changeDate = i === 0 ? ['', e] : [s, ''];
       }
@@ -104,7 +104,7 @@ export default {
               }
             }
           });
-      return h('div', null, [spanEl, this.clearAll && !i ? '' : iconEl]);
+      return h('div', null, [spanEl, this.allowClear && !i ? '' : iconEl]);
     },
 
     renderMain(h) {
