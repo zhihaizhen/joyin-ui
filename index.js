@@ -4,6 +4,6 @@
  */
 
 import JoyinRangePicker from './lib/plugins/rangePicker/index';
-export default {
+export {
   JoyinRangePicker
 };
