@@ -19,7 +19,7 @@ export default {
       default: false
     },
     // 清除所有
-    allowClear: {
+    clearAll: {
       type: Boolean,
       default: true
     },
@@ -65,7 +65,7 @@ export default {
   methods: {
     onClearByIndex(i) {
       let changeDate = [];
-      if (!this.allowClear) {
+      if (!this.clearAll) {
         const [s, e] = this.rangeDate;
         changeDate = i === 0 ? ['', e] : [s, ''];
       }
@@ -91,7 +91,7 @@ export default {
         { class: !this.rangeDate[i] && 'placeholder'}, 
         this.rangeDate[i] ? this.rangeDate[i] : this.placeholder[i]
       );
-      const iconEl = this.clearStart && this.rangeDate[i] && 
+      const iconEl = this.rangeDate[i] ?
         h('a-icon', 
           { 
             attrs: {
@@ -103,8 +103,12 @@ export default {
                 this.onClearByIndex(i);
               }
             }
-          });
-      return h('div', null, [spanEl, this.allowClear && !i ? '' : iconEl]);
+          }) : '';
+      const renderClose = () => {
+        if (this.clearAll) return i ? iconEl : '';
+        return (this.clearStart && !i) || (this.clearEnd && i) ? iconEl : '';
+      }
+      return h('div', null, [spanEl, renderClose()]);
     },
 
     renderMain(h) {
