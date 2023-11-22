@@ -1,9 +1,10 @@
 /**
  * joyin-ui
- * joyin组件库
  */
 
 import JoyinRangePicker from './lib/plugins/rangePicker/index';
+import JoyinInputNumber from './lib/plugins/inputNumber/index';
 export {
-  JoyinRangePicker
+  JoyinRangePicker,
+  JoyinInputNumber
 };

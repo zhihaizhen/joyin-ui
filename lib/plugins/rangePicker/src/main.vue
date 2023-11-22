@@ -29,6 +29,10 @@ export default {
       default: () => {
         return ['开始日期', '结束日期']
       }
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -54,8 +58,16 @@ export default {
   },
   created() {
     const evt = e => {
-      if (e.target.className && e.target.className.indexOf('ant-calender')) return;
-      this.isOpen = false;
+      if (this.disabled) return;
+      setTimeout(() => {
+        const clickedElement = e.target;
+        const datepickerElement = this.$el;
+        if (datepickerElement.contains(clickedElement)) {
+          this.isOpen = true;
+          return;
+        }
+          this.isOpen = false;
+      }, 300);
     }
     window.addEventListener('click', evt);
     this.$once('hook:beforeDestroy', function() {
@@ -63,6 +75,13 @@ export default {
     })
   },
   methods: {
+    getCalendarContainer(n) {
+      const className = n.getAttribute('class');
+      if (className === 'joyin-range-picker-container') {
+        return n;
+      }
+      return this.getCalendarContainer(n.parentNode);
+    },
     onClearByIndex(i) {
       let changeDate = [];
       if (!this.clearAll) {
@@ -79,10 +98,6 @@ export default {
       const [s, e] = val;
       this.$emit('input', [s, e]);
       this.$emit('change', val);
-    },
-
-    onContainerClick() {
-      this.isOpen = true;
     },
 
     renderItem(h, i) {
@@ -108,19 +123,13 @@ export default {
         if (this.clearAll) return i ? iconEl : '';
         return (this.clearStart && !i) || (this.clearEnd && i) ? iconEl : '';
       }
-      return h('div', null, [spanEl, renderClose()]);
+      return h('div', {class: 'item'}, [spanEl, renderClose()]);
     },
 
     renderMain(h) {
       return h('div', 
         {
-          class: 'main-container',
-          on: {
-            click: e => {
-              e && e.stopPropagation();
-              this.onContainerClick();
-            }
-          }
+          class: this.disabled ? 'main-container disabled' : 'main-container',
         }, 
         [this.renderItem(h, 0), h('i',null,'~'), this.renderItem(h, 1)]);
     },
@@ -133,7 +142,8 @@ export default {
           value: this.value,
           fomat: this.format,
           valueFormat: this.format,
-          open: this.isOpen
+          open: this.isOpen,
+          getCalendarContainer: this.getCalendarContainer
         },
         on: {
           change: e => {
@@ -162,6 +172,17 @@ export default {
     background-image: none;
     border: 1px solid #d9d9d9;
     border-radius: 4px;
+    .disabled {
+      cursor: not-allowed;
+      background-color: #f6f6f6;
+      &:hover {
+        .item {
+          i {
+            display: none !important;
+          }
+        }
+      }
+    }
     .main-container {
       width: 100%;
       height: 100%;
@@ -187,14 +208,17 @@ export default {
         }
       }
       &:hover {
-        i {
-          display: inline !important;
+        .item {
+          i {
+            display: inline;
+          }
         }
       }
     }
     /deep/ .ant-calendar-picker {
       visibility: hidden;
       position: absolute;
+      width: 0px;
       top: 0px;
       left: 0px;
       z-index: -1;
