@@ -58,11 +58,13 @@ export default {
   },
   created() {
     const evt = e => {
+      e && e.stopPropagation();
       if (this.disabled) return;
       setTimeout(() => {
         const clickedElement = e.target;
         const datepickerElement = this.$el;
-        if (datepickerElement.contains(clickedElement)) {
+        const rangePickerElement = this.$refs.rangePickerRef?.$vnode?.componentInstance?.popupRef?.$el;
+        if (datepickerElement.contains(clickedElement) || (rangePickerElement && rangePickerElement.contains(clickedElement))) {
           this.isOpen = true;
           return;
         }
@@ -137,13 +139,14 @@ export default {
     renderDate(h) {
       return h('a-range-picker',
       {
+        ref: 'rangePickerRef',
         attrs: {
           ...this.$attrs,
           value: this.value,
           fomat: this.format,
           valueFormat: this.format,
           open: this.isOpen,
-          getCalendarContainer: this.getCalendarContainer
+          // getCalendarContainer: this.getCalendarContainer
         },
         on: {
           change: e => {
