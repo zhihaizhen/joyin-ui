@@ -220,6 +220,7 @@ export default {
     }
     /deep/ .ant-calendar-picker {
       visibility: hidden;
+      overflow: hidden;
       position: absolute;
       width: 0px;
       top: 0px;

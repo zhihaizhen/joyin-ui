@@ -4,7 +4,7 @@
         <a-input
             v-bind="$attrs"
             v-model="inputValue"
-            disabled="disabled"
+            :disabled="disabled"
             inputmode="text"
             class="joyin-input-number"
             @blur="onBlur"
@@ -66,7 +66,8 @@ export default {
         return {
             isFocus: false,
             cloneValue: '',
-            inputValue: ''
+            inputValue: '',
+            isAutoFormat: false // 失去焦点时自动格式化数字，主要针对以0开头的非法数字比如‘002’， ‘-0002’
         };
     },
     computed: {
@@ -86,9 +87,9 @@ export default {
             return +this. inputValue >= this.max;
         },
         inputValueStr() {
-            const { isFocus, inputvalue, precision } = this;
+            const { isFocus, inputValue, precision } = this;
             if (isFocus) {
-                return inputvalue + '';
+                return inputValue + '';
             }
             if (this.isIllegAlNum(inputValue) || inputValue === '-')
                 return inputValue;
@@ -101,7 +102,7 @@ export default {
         }
     },
     watch: {
-        inputValue (newVal, odval) {
+        inputValue(newVal, odVal) {
             if (!this.isFocus) return;
             const oldVal = odVal === undefined ? '' : odVal;
             if (newVal ==='' || newVal === undefined) {
@@ -109,9 +110,9 @@ export default {
                 if (this.$listeners.change) this.$listeners.change(newVal); 
                 return;
             }
-            this.validateNum (newVal, oldVal);
+            this.validateNum(newVal, oldVal);
         },
-        value (newVal) {
+        value(newVal) {
             this.inputValue = this.isIllegAlNum(newVal) ? '' : Number(this.$Big(newVal || 0).div(this.unitNum));
             this.cloneValue = this.inputValue;
         }
@@ -119,14 +120,15 @@ export default {
     created() {
         try {
             this.inputValue = this.isIllegAlNum(this.value) ? '' : this.$Big(this.value || 0).div(this.unitNum).toFixedCy(this.precision);
-            this.clonevalue = this.isIllegAINum(this.value) ? '' : Number(this.$Big(this.value || 0).div(this.unitNum));
+            this.clonevalue = this.isIllegAlNum(this.value) ? '' : Number(this.$Big(this.value || 0).div(this.unitNum));
         }catch (error) {
             console.log('[input-number create]', error);
         }
     },
     methods: {
         validateNum (nwVal, oldVal) {
-            const newval = nwVal + '';
+            this.isAutoFormat = false;
+            const newVal = nwVal + '';
             // 数字检查-整数
             // if (this.precision === 0 && /^［0-9］+\.$/.test（newva_））
             if (!this.isNagative && /^-/.test(newVal)) {
@@ -148,12 +150,14 @@ export default {
             }
             // 如果0开头
             if (/^0/.test(newVal) && !/^0(\.|$)/.test(newVal)){
-                this.inputValueChange (oldVal);
+                // this.inputValueChange (oldVal);
+                this.isAutoFormat = true;
                 return;
             }
             // 如果-0开头
             if (/^-0/.test(newVal) && !/^-0(\.|$)/.test(newVal)){
-                this.inputValueChange (oldVal);
+                // this.inputValueChange (oldVal);
+                this.isAutoFormat = true;
                 return;
             }
             // 判断有效位数
@@ -171,7 +175,7 @@ export default {
                 return;
             }
             if (numValue < min) {
-                this.inputValuechange(min + '');
+                // this.inputValueChange(min + '');
                 return;
             }
             const timesNum = Number(this.$Big(newVal).times(this.unitNum));
@@ -191,10 +195,21 @@ export default {
         },
         onBlur(e) {
             this.isFocus = false;
-            const { inputValue, precision } = this;
-            this. cloneValue = inputValue;
+            const { inputValue, precision, min, unitNum, isAutoFormat } = this;
+            this.cloneValue = inputValue;
             if (this.isIllegAlNum(inputValue)) return;
-            this.inputValue = this.$Big(inputValue || 0).toFixedcy(precision);
+            let resultVal = inputValue;
+            if (+inputValue < min) {
+                resultVal = min;
+                const timesNum = Number(this.$Big(resultVal).times(unitNum));
+                this.$emit('input', timesNum);
+            }
+            if (isAutoFormat) {
+                const timesNum = Number(this.$Big(resultVal).times(unitNum));
+                this.$emit('input', timesNum);
+            }
+
+            this.inputValue = this.$Big(resultVal || 0).toFixedCy(precision);
             if (this.$listeners.blur) this.$listeners.blur(e);
         },
         onIncrease() {
