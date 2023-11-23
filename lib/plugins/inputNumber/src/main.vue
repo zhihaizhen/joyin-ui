@@ -34,7 +34,7 @@ export default {
         },
         min: {
             type: Number,
-            default: Infinity
+            default: -Infinity
         },
         precision: {
             type: Number,
