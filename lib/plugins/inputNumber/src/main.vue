@@ -162,7 +162,7 @@ export default {
             }
             // 判断有效位数
             if (typeof this.precision === 'number' && /\./.test(newVal)) {
-                if (newval.split('.')[1].length > this.precision) {
+                if (newVal.split('.')[1].length > this.precision) {
                     this.inputValueChange (oldVal);
                     return; 
                 }
