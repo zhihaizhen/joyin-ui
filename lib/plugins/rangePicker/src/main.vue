@@ -1,4 +1,7 @@
 <script>
+/**
+ * 日期区间框
+ */
 export default {
   name: 'JoyinRangePicker',
   props: {

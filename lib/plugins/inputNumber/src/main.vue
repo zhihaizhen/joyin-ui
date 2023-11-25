@@ -21,6 +21,9 @@
 
 </template>
 <script>
+/**
+ * 数字输入框
+ */
 export default {
     name: 'JoyinInputNumber',
     inheritAttrs: false,
@@ -96,9 +99,7 @@ export default {
             return this.$Big(inputValue || 0).toFixedCy(precision);
         },
         isShowTip() {
-            const { isFocus, inputValuestr } = this;
-            if (isFocus && !!inputValuestr) return true; 
-            return false;
+            return this.isFocus && !!this.inputValueStr; 
         }
     },
     watch: {
