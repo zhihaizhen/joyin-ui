@@ -70,6 +70,7 @@ export default {
             isFocus: false,
             cloneValue: '',
             inputValue: '',
+            inputValueStr: '',
             isAutoFormat: false // 失去焦点时自动格式化数字，主要针对以0开头的非法数字比如‘002’， ‘-0002’
         };
     },
@@ -89,15 +90,15 @@ export default {
         maxDisabled () {
             return +this. inputValue >= this.max;
         },
-        inputValueStr() {
-            const { isFocus, inputValue, precision } = this;
-            if (isFocus) {
-                return inputValue + '';
-            }
-            if (this.isIllegAlNum(inputValue) || inputValue === '-')
-                return inputValue;
-            return this.$Big(inputValue || 0).toFixedCy(precision);
-        },
+        // inputValueStr() {
+        //     const { isFocus, inputValue, precision } = this;
+        //     if (isFocus) {
+        //         return inputValue + '';
+        //     }
+        //     if (this.isIllegAlNum(inputValue) || inputValue === '-')
+        //         return inputValue;
+        //     return this.$Big(inputValue || 0).toFixedCy(precision);
+        // },
         isShowTip() {
             return this.isFocus && !!this.inputValueStr; 
         }
@@ -111,7 +112,8 @@ export default {
                 if (this.$listeners.change) this.$listeners.change(newVal); 
                 return;
             }
-            this.validateNum(newVal, oldVal);
+            this.debounce(this.validateNum(newVal, oldVal), 300);
+            this.debounce(this.updateInputValueStr(), 800);
         },
         value(newVal) {
             this.inputValue = this.isIllegAlNum(newVal) ? '' : Number(this.$Big(newVal || 0).div(this.unitNum));
@@ -127,6 +129,24 @@ export default {
         }
     },
     methods: {
+        debounce(func, delay) {
+            let timer = null;
+            return function (...args) {
+                timer && clearTimeout(timer);
+                timer = setTimeout(() => {
+                    func && func.call(this, ...args);
+                }, delay);
+            }
+        },
+        updateInputValueStr() {
+            const { isFocus, inputValue, precision } = this;
+            if (isFocus) {
+                return inputValue + '';
+            }
+            if (this.isIllegAlNum(inputValue) || inputValue === '-')
+                return inputValue;
+            this.inputValueStr = this.$Big(inputValue || 0).toFixedCy(precision);
+        },
         validateNum (nwVal, oldVal) {
             this.isAutoFormat = false;
             const newVal = nwVal + '';
