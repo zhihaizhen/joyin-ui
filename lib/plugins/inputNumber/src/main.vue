@@ -1,28 +1,6 @@
-<template>
-    <a-tooltip :visible="isShowTip">
-        <template slot="title">{{ inputValueStr }} </template>
-        <a-input
-            v-bind="$attrs"
-            v-model="inputValue"
-            :disabled="disabled"
-            inputmode="text"
-            class="joyin-input-number"
-            @blur="onBlur"
-            @focus="onFocus"
-            @keydown.up.prevent="onIncrease"
-            @keydown.down.prevent="onDecrease"
-        >
-            <template slot="prefix"><slot name="prefix"/></template>
-            <template slot="suffix"><slot name="suffix"/></template>
-            <template slot="addonBefore"><slot name="addonBefore"/></template>
-            <template slot="addonAfter"><slot name="addonAfter"/></template>
-        </a-input>
-    </a-tooltip>
-
-</template>
 <script>
 /**
- * 数字输入框
+ * 数字输入框 create by zhz
  */
 export default {
     name: 'JoyinInputNumber',
@@ -31,6 +9,11 @@ export default {
         value: [String,Number],
         disabled: Boolean,
         disabledLable: String,
+        // 是否开启气泡提示
+        isAbelTip: {
+            type: Boolean,
+            default: true
+        },
         max: {
             type: Number,
             default: Infinity
@@ -81,34 +64,26 @@ export default {
             if (this.unit === 'numberTenThousand') return 10000;
             if (this.unit === 'numberMillion') return 1000000;
             if (this.unit === 'numberTenMillion') return 10000000;
-            if (this.unit === 'numberBillion') return 100000000; 
+            if (this.unit === 'numberBillion') return 100000000;
             return 1;
         },
         minDisabled() {
-            return +this.inputValue <- this.min;
+            return +this.inputValue <= this.min;
         },
         maxDisabled () {
-            return +this. inputValue >= this.max;
+            return +this.inputValue >= this.max;
         },
-        // inputValueStr() {
-        //     const { isFocus, inputValue, precision } = this;
-        //     if (isFocus) {
-        //         return inputValue + '';
-        //     }
-        //     if (this.isIllegAlNum(inputValue) || inputValue === '-')
-        //         return inputValue;
-        //     return this.$Big(inputValue || 0).toFixedCy(precision);
-        // },
         isShowTip() {
             return this.isFocus && !!this.inputValueStr; 
-        }
+        } 
     },
     watch: {
         inputValue(newVal, odVal) {
             if (!this.isFocus) return;
             const oldVal = odVal === undefined ? '' : odVal;
             if (newVal ==='' || newVal === undefined) {
-                this.$emit ('input', newVal);
+                this.$emit('input', newVal);
+                this.debounce(this.updateInputValueStr(), 800);
                 if (this.$listeners.change) this.$listeners.change(newVal); 
                 return;
             }
@@ -128,7 +103,46 @@ export default {
             console.log('[input-number create]', error);
         }
     },
+    render(h) {
+        return this.isAbelTip ? this.renderInputInToolTip(h) : this.renderInput(h);
+    },
     methods: {
+        renderInputInToolTip(h) {
+            return h('a-tooltip', {
+                attrs: {
+                    visible: this.isShowTip
+                }
+            }, [h('template', {slot: 'title'}, this.inputValueStr), this.renderInput(h)]);
+        },
+        renderInput(h) {
+            return h('a-input', 
+            {
+                attrs: {
+                    ...this.$attrs,
+                    class: 'joyin-input-number',
+                    inputmode: 'text',
+                    value: this.inputValue,
+                    disabled: this.disabled,
+                },
+                on: {
+                    input: e => {
+                        this.$emit('input', e.target.value);
+                    },
+                    change: e => {
+                        this.$emit('change', e);
+                    },
+                    blur: e => {
+                        this.onBlur(e);
+                    },
+                    focus: e => {
+                        this.onFocus(e);
+                    },
+                    keydown: e => {
+                        this.onKeyDown(e);
+                    }
+                }
+            });
+        },
         debounce(func, delay) {
             let timer = null;
             return function (...args) {
@@ -140,11 +154,15 @@ export default {
         },
         updateInputValueStr() {
             const { isFocus, inputValue, precision } = this;
-            if (isFocus) {
-                return inputValue + '';
+            if (!isFocus) {
+                this.inputValueStr =  inputValue + ''; 
+                return;
             }
-            if (this.isIllegAlNum(inputValue) || inputValue === '-')
-                return inputValue;
+            if (this.isIllegAlNum(inputValue) || inputValue === '-'){
+                this.inputValueStr = inputValue;
+                return;
+            }
+            
             this.inputValueStr = this.$Big(inputValue || 0).toFixedCy(precision);
         },
         validateNum (nwVal, oldVal) {
@@ -153,7 +171,7 @@ export default {
             // 数字检查-整数
             // if (this.precision === 0 && /^［0-9］+\.$/.test（newva_））
             if (!this.isNagative && /^-/.test(newVal)) {
-                this.inputValueChange (oldVal);
+                this.inputValueChange(oldVal);
                 return;
             }
             if (/^--/.test(newVal)) {
@@ -161,7 +179,7 @@ export default {
                 return;
             }
             if (this.precision === 0 && /^[-+]?\d+\.$/.test(newVal)){
-                this.inputValueChange (oldVal);
+                this.inputValueChange(oldVal);
                 return;
             }
             // 数字检查—小数
@@ -184,7 +202,7 @@ export default {
             // 判断有效位数
             if (typeof this.precision === 'number' && /\./.test(newVal)) {
                 if (newVal.split('.')[1].length > this.precision) {
-                    this.inputValueChange (oldVal);
+                    this.inputValueChange(oldVal);
                     return; 
                 }
             }
@@ -233,30 +251,33 @@ export default {
             this.inputValue = this.$Big(resultVal || 0).toFixedCy(precision);
             if (this.$listeners.blur) this.$listeners.blur(e);
         },
-        onIncrease() {
-            if (this.disabled | this.maxDisabled) return; this.change(1);
-        },
-        onDecrease() {
-            if (this.disabled || this.minDisabled) return; this.change(-1);
+        onKeyDown(e) {
+            if (this.disabled | this.maxDisabled) return;
+            const { keyCode } = e;
+            if (keyCode === 38 || keyCode === 40) {
+                e && e.preventDefault();
+                this.change(keyCode === 38 ? 1 : -1);
+            }
         },
         isIllegAlNum (num) {
             if (num == '-') return false;
             return num === '' || num === null || isNaN(+num);
         },
         change(num) {
-            const { value, $Big, precision, isStepPoint } = this;
-            let step = 1, fixLen;
+            const { inputValue, $Big, precision, isStepPoint } = this;
+            let step = 1;
+            let fixLen = 0;
             if (precision && isStepPoint) {
-                fixlen = precision;
+                fixLen = precision;
                 step = '0.' + '0'.repeat(precision - 1) + '1';
             } else {
-                const decimal = value.split('.')[1];
+                const decimal = inputValue.split('.')[1];
                 if (decimal) {
                     step = '0.' + '0'.repeat(decimal.length - 1) + '1';
                     fixLen = decimal.length;
                 }
             }
-            this.inputValue = $Big(value | 0).plus($Big(step).times(num)).toFixed(fixlen);
+            this.inputValue = $Big(inputValue | 0).plus($Big(step).times(num)).toFixed(fixLen);
         }
     }
 };
