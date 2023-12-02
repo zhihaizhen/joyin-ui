@@ -58,14 +58,32 @@ export default {
         };
     },
     computed: {
-        unitNum () {
-            if (this.unit === 'numberPercent') return 0.01;
-            if (this.unit === 'numberThousand') return 1000;
-            if (this.unit === 'numberTenThousand') return 10000;
-            if (this.unit === 'numberMillion') return 1000000;
-            if (this.unit === 'numberTenMillion') return 10000000;
-            if (this.unit === 'numberBillion') return 100000000;
-            return 1;
+        unitNum() {
+            let num = 1;
+            switch (this.unit) {
+                case 'numberPercent':
+                    num = 0.01;
+                    break;
+                case 'numberThousand':
+                    num = 1000;
+                    break;
+                case 'numberTenThousand':
+                    num = 10000;
+                    break;
+                case 'numberMillion':
+                    num = 1000000;
+                    break;
+                case 'numberTenMillion':
+                    num = 10000000;
+                    break;
+                case 'numberBillion':
+                    num = 100000000;
+                    break;
+                default:
+                    num = 1;
+                    break;
+            }
+            return num;
         },
         minDisabled() {
             return +this.inputValue <= this.min;
@@ -126,10 +144,7 @@ export default {
                 },
                 on: {
                     input: e => {
-                        this.$emit('input', e.target.value);
-                    },
-                    change: e => {
-                        this.$emit('change', e);
+                        this.inputValue = e.target.value;
                     },
                     blur: e => {
                         this.onBlur(e);
@@ -155,7 +170,7 @@ export default {
         updateInputValueStr() {
             const { isFocus, inputValue, precision } = this;
             if (!isFocus) {
-                this.inputValueStr =  inputValue + ''; 
+                this.inputValueStr =  inputValue + '';
                 return;
             }
             if (this.isIllegAlNum(inputValue) || inputValue === '-'){
@@ -165,7 +180,7 @@ export default {
             
             this.inputValueStr = this.$Big(inputValue || 0).toFixedCy(precision);
         },
-        validateNum (nwVal, oldVal) {
+        validateNum(nwVal, oldVal) {
             this.isAutoFormat = false;
             const newVal = nwVal + '';
             // 数字检查-整数
@@ -222,7 +237,8 @@ export default {
             if(this.$listeners.change) {
                 this.$listeners.change(timesNum);
             }
-            this.inputValueChange(newVal);
+            // this.inputValueChange(newVal);
+            this.cloneValue = newVal;
         },
         inputValueChange (val) {
             this.inputValue = val;
