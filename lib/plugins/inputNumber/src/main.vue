@@ -116,7 +116,7 @@ export default {
     created() {
         try {
             this.inputValue = this.isIllegAlNum(this.value) ? '' : this.$Big(this.value || 0).div(this.unitNum).toFixedCy(this.precision);
-            this.clonevalue = this.isIllegAlNum(this.value) ? '' : Number(this.$Big(this.value || 0).div(this.unitNum));
+            this.cloneValue = this.isIllegAlNum(this.value) ? '' : Number(this.$Big(this.value || 0).div(this.unitNum));
         }catch (error) {
             console.log('[input-number create]', error);
         }
