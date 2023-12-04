@@ -133,6 +133,7 @@ export default {
             }, [h('template', {slot: 'title'}, this.inputValueStr), this.renderInput(h)]);
         },
         renderInput(h) {
+            const {prefix, suffix, addonBefore, addonAfter} = this.$slots;
             return h('a-input', 
             {
                 attrs: {
@@ -156,7 +157,12 @@ export default {
                         this.onKeyDown(e);
                     }
                 }
-            });
+            },[
+                prefix ? h('template', {slot: 'prefix'}, [prefix]) : null,
+                suffix ? h('template', {slot: 'suffix'}, [suffix]) : null,
+                addonBefore ? h('template', {slot: 'addonBefore'}, [addonBefore]) : null,
+                addonAfter ? h('template', {slot: 'addonAfter'}, [addonAfter]) : null
+            ]);
         },
         debounce(func, delay) {
             let timer = null;
