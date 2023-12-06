@@ -172,7 +172,7 @@ export default {
   .joyin-range-picker-container {
     position: relative;
     width: 100%;
-    min-width: 216px;
+    width: 216px;
     height: 32px;
     background-color: #fff;
     background-image: none;
