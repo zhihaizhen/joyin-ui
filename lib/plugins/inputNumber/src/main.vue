@@ -97,7 +97,6 @@ export default {
     },
     watch: {
         inputValue(newVal, odVal) {
-            console.log('inputValue----watch---', newVal, odVal);
             if (!this.isFocus) return;
             const oldVal = odVal === undefined ? '' : odVal;
             if (newVal ==='' || newVal === undefined) {
