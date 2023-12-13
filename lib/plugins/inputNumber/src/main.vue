@@ -97,6 +97,7 @@ export default {
     },
     watch: {
         inputValue(newVal, odVal) {
+            console.log('inputValue----watch---', newVal, odVal);
             if (!this.isFocus) return;
             const oldVal = odVal === undefined ? '' : odVal;
             if (newVal ==='' || newVal === undefined) {
@@ -109,14 +110,14 @@ export default {
             this.debounce(this.updateInputValueStr(), 800);
         },
         value(newVal) {
-            this.inputValue = this.isIllegAlNum(newVal) ? '' : Number(this.$Big(newVal || 0).div(this.unitNum));
+            this.inputValue = this.isIllegAlNum(newVal) ? '' : newVal === '-' ? '-' : Number(this.$Big(newVal).div(this.unitNum));
             this.cloneValue = this.inputValue;
         }
     },
     created() {
         try {
-            this.inputValue = this.isIllegAlNum(this.value) ? '' : this.$Big(this.value || 0).div(this.unitNum).toFixedCy(this.precision);
-            this.cloneValue = this.isIllegAlNum(this.value) ? '' : Number(this.$Big(this.value || 0).div(this.unitNum));
+            this.inputValue = this.isIllegAlNum(this.value) ? '' : this.$Big(this.value).div(this.unitNum).toFixedCy(this.precision);
+            this.cloneValue = this.isIllegAlNum(this.value) ? '' : Number(this.$Big(this.value).div(this.unitNum));
         }catch (error) {
             console.log('[input-number create]', error);
         }
@@ -184,11 +185,11 @@ export default {
                 return;
             }
             
-            this.inputValueStr = this.$Big(inputValue || 0).toFixedCy(precision);
+            this.inputValueStr = this.$Big(inputValue).toFixedCy(precision);
         },
         validateNum(nwVal, oldVal) {
             this.isAutoFormat = false;
-            const newVal = nwVal + '';
+            const newVal = Object.is(nwVal, -0) ? '-0' : nwVal + '';
             // 数字检查-整数
             // if (this.precision === 0 && /^［0-9］+\.$/.test（newva_））
             if (!this.isNagative && /^-/.test(newVal)) {
@@ -238,8 +239,13 @@ export default {
                 // this.inputValueChange(min + '');
                 return;
             }
-            const timesNum = Number(this.$Big(newVal).times(this.unitNum));
-            this.$emit('input', timesNum);
+            const timesNum = newVal === '-' ? '-' : Number(this.$Big(newVal).times(this.unitNum));
+            if (Object.is(timesNum, -0)) {
+                this.isAutoFormat = true;
+            } else {
+                this.$emit('input', timesNum);
+            }
+            
             if(this.$listeners.change) {
                 this.$listeners.change(timesNum);
             }
@@ -262,15 +268,15 @@ export default {
             let resultVal = inputValue;
             if (+inputValue < min) {
                 resultVal = min;
-                const timesNum = Number(this.$Big(resultVal).times(unitNum));
+                const timesNum = resultVal === '-' ? '-' : Number(this.$Big(resultVal).times(unitNum));
                 this.$emit('input', timesNum);
             }
             if (isAutoFormat) {
-                const timesNum = Number(this.$Big(resultVal).times(unitNum));
+                const timesNum = resultVal === '-' ? '-' : Number(this.$Big(resultVal).times(unitNum));
                 this.$emit('input', timesNum);
             }
 
-            this.inputValue = this.$Big(resultVal || 0).toFixedCy(precision);
+            this.inputValue = resultVal === '-' ? '-' : this.$Big(resultVal).toFixedCy(precision);
             if (this.$listeners.blur) this.$listeners.blur(e);
         },
         onKeyDown(e) {
